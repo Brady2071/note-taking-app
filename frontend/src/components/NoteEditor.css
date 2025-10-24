@@ -3,117 +3,159 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background: #ffffff;
+  position: relative;
 }
 
 .note-editor-header {
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: white;
+  padding: 24px;
+  border-bottom: 1px solid #e5e5e7;
+  background: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
+  position: relative;
 }
 
 .note-title-input {
   flex: 1;
   border: none;
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 600;
   outline: none;
   padding: 0;
-  color: #333;
+  color: #1d1d1f;
+  background: transparent;
+  letter-spacing: -0.003em;
+  line-height: 1.125;
 }
 
 .note-title-input::placeholder {
-  color: #999;
+  color: #86868b;
+  font-weight: 400;
 }
 
 .note-editor-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  align-items: center;
 }
 
 .save-btn, .delete-btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 980px;
+  font-size: 17px;
+  font-weight: 400;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
+  letter-spacing: -0.022em;
+  min-width: 44px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .save-btn {
-  background-color: #2196f3;
+  background: #0071e3;
   color: white;
 }
 
 .save-btn:hover:not(:disabled) {
-  background-color: #1976d2;
+  background: #0077ed;
+  transform: scale(1.02);
 }
 
 .save-btn:disabled {
-  background-color: #ccc;
+  background: #d2d2d7;
   cursor: not-allowed;
+  transform: none;
 }
 
 .delete-btn {
-  background-color: #f44336;
+  background: #ff3b30;
   color: white;
 }
 
 .delete-btn:hover:not(:disabled) {
-  background-color: #d32f2f;
+  background: #ff453a;
+  transform: scale(1.02);
 }
 
 .delete-btn:disabled {
-  background-color: #ccc;
+  background: #d2d2d7;
   cursor: not-allowed;
+  transform: none;
 }
 
 .tags-section {
-  padding: 15px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  background-color: #fafafa;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e5e7;
+  background: #fbfbfd;
+  position: relative;
 }
 
 .tags-input {
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  align-items: center;
 }
 
 .tags-input input {
   flex: 1;
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 8px 12px;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  font-size: 17px;
   outline: none;
+  background: #f2f2f7;
+  color: #1d1d1f;
+  font-weight: 400;
+  transition: all 0.2s ease-in-out;
+  letter-spacing: -0.022em;
+}
+
+.tags-input input::placeholder {
+  color: #86868b;
+  font-weight: 400;
 }
 
 .tags-input input:focus {
-  border-color: #2196f3;
+  border-color: #0071e3;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
 }
 
 .tags-input button {
-  padding: 6px 12px;
-  background-color: #4caf50;
+  padding: 8px 16px;
+  background: #0071e3;
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 980px;
+  font-size: 17px;
+  font-weight: 400;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease-in-out;
+  letter-spacing: -0.022em;
+  min-width: 44px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tags-input button:hover:not(:disabled) {
-  background-color: #45a049;
+  background: #0077ed;
+  transform: scale(1.02);
 }
 
 .tags-input button:disabled {
-  background-color: #ccc;
+  background: #d2d2d7;
   cursor: not-allowed;
+  transform: none;
 }
 
 .tags-list {
@@ -123,61 +165,84 @@
 }
 
 .tag {
-  background-color: #e1f5fe;
-  color: #0277bd;
-  font-size: 11px;
+  background: #e8f4fd;
+  color: #0071e3;
+  font-size: 13px;
+  font-weight: 400;
   padding: 4px 8px;
-  border-radius: 12px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  transition: all 0.2s ease-in-out;
+  letter-spacing: -0.022em;
+}
+
+.tag:hover {
+  background: #0071e3;
+  color: #ffffff;
+  transform: scale(1.02);
 }
 
 .tag button {
   background: none;
   border: none;
-  color: #0277bd;
+  color: #0071e3;
   cursor: pointer;
-  font-size: 14px;
-  padding: 0;
+  font-size: 12px;
+  padding: 2px;
   width: 16px;
   height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
+  opacity: 0.7;
 }
 
 .tag button:hover {
-  background-color: #0277bd;
+  background: #0071e3;
   color: white;
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .note-content-input {
   flex: 1;
   border: none;
   outline: none;
-  padding: 20px;
-  font-size: 14px;
-  line-height: 1.6;
+  padding: 24px;
+  font-size: 17px;
+  line-height: 1.47059;
   resize: none;
   font-family: inherit;
-  color: #333;
+  color: #1d1d1f;
+  background: #ffffff;
+  font-weight: 400;
+  letter-spacing: -0.022em;
 }
 
 .note-content-input::placeholder {
-  color: #999;
+  color: #86868b;
+  font-weight: 400;
 }
 
 .note-editor-footer {
-  padding: 10px 20px;
-  border-top: 1px solid #f0f0f0;
-  background-color: #fafafa;
+  padding: 12px 24px;
+  border-top: 1px solid #e5e5e7;
+  background: #fbfbfd;
   text-align: center;
+  position: relative;
 }
 
 .note-editor-footer small {
-  color: #666;
-  font-size: 11px;
+  color: #86868b;
+  font-size: 13px;
+  font-weight: 400;
+  background: #f2f2f7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  letter-spacing: -0.022em;
 }

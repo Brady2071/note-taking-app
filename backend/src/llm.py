@@ -1,7 +1,6 @@
 import os
 import json
-import time
-import requests
+from openai import OpenAI
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
@@ -14,75 +13,50 @@ class LLMResponse:
 class LLMClient:
     def __init__(self):
         self.api_key = os.getenv('GITHUB_TOKEN')
-        self.base_url = "https://models.github.ai/inference"
+        self.endpoint = "https://models.github.ai/inference"
         self.model = "openai/gpt-4.1-mini"
         
         if not self.api_key:
             raise ValueError("GITHUB_TOKEN environment variable is required")
+        
+        self.client = OpenAI(
+            base_url=self.endpoint,
+            api_key=self.api_key,
+        )
     
     def call_llm_model(
         self, 
         messages: List[Dict[str, str]], 
         temperature: float = 1.0, 
         top_p: float = 1.0,
-        max_retries: int = 3,
-        backoff_factor: float = 2.0
+        max_retries: int = 3
     ) -> LLMResponse:
         """
-        Call GitHub Models inference endpoint with retry logic and rate limiting
+        Call GitHub Models inference endpoint using OpenAI client
         """
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "temperature": temperature,
-            "top_p": top_p,
-            "max_tokens": 2000
-        }
-        
-        for attempt in range(max_retries):
-            try:
-                response = requests.post(
-                    self.base_url,
-                    headers=headers,
-                    json=payload,
-                    timeout=30
-                )
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    return LLMResponse(
-                        content=data.get('choices', [{}])[0].get('message', {}).get('content', ''),
-                        usage=data.get('usage', {})
-                    )
-                elif response.status_code == 429:  # Rate limit
-                    wait_time = backoff_factor ** attempt
-                    print(f"Rate limited. Waiting {wait_time} seconds...")
-                    time.sleep(wait_time)
-                    continue
-                else:
-                    return LLMResponse(
-                        content="",
-                        error=f"API error: {response.status_code} - {response.text}"
-                    )
-                    
-            except requests.exceptions.RequestException as e:
-                if attempt == max_retries - 1:
-                    return LLMResponse(
-                        content="",
-                        error=f"Request failed: {str(e)}"
-                    )
-                wait_time = backoff_factor ** attempt
-                time.sleep(wait_time)
-        
-        return LLMResponse(
-            content="",
-            error="Max retries exceeded"
-        )
+        try:
+            response = self.client.chat.completions.create(
+                messages=messages,
+                temperature=temperature,
+                top_p=top_p,
+                model=self.model,
+                max_tokens=2000
+            )
+            
+            return LLMResponse(
+                content=response.choices[0].message.content,
+                usage={
+                    'prompt_tokens': response.usage.prompt_tokens,
+                    'completion_tokens': response.usage.completion_tokens,
+                    'total_tokens': response.usage.total_tokens
+                }
+            )
+            
+        except Exception as e:
+            return LLMResponse(
+                content="",
+                error=f"API call failed: {str(e)}"
+            )
 
 def translate_text(
     text: str, 
