@@ -1,68 +1,103 @@
 #!/usr/bin/env python3
 """
-Migration script to move from SQLite to Postgres/Supabase
-Run this script to migrate existing data to the new database
+Database migration script from SQLite to PostgreSQL
+Run this script to migrate existing SQLite data to PostgreSQL
 """
 
 import os
 import json
-from datetime import datetime, date, time
 from sqlalchemy import create_engine, text
-from models import Base, Note, SessionLocal
-from dotenv import load_dotenv
+from sqlalchemy.orm import sessionmaker
+from models import Note, Base
+from datetime import datetime
 
-load_dotenv()
-
-def migrate_data():
-    """Migrate data from SQLite to Postgres"""
+def migrate_sqlite_to_postgres():
+    """Migrate data from SQLite to PostgreSQL"""
     
-    # Source database (SQLite)
-    sqlite_engine = create_engine('sqlite:///notes.db', echo=False)
-    sqlite_session = sessionmaker(autocommit=False, autoflush=False, bind=sqlite_engine)()
+    # Check if DATABASE_URL is set
+    database_url = os.getenv('DATABASE_URL')
+    if not database_url:
+        print("❌ DATABASE_URL environment variable not set!")
+        print("Please set DATABASE_URL to your PostgreSQL connection string")
+        return False
     
-    # Target database (Postgres)
-    postgres_url = os.getenv('DATABASE_URL')
-    if not postgres_url:
-        print("DATABASE_URL not found. Please set it in your environment.")
-        return
+    # SQLite connection (local database)
+    sqlite_url = 'sqlite:///notes.db'
+    sqlite_engine = create_engine(sqlite_url)
+    sqlite_session = sessionmaker(bind=sqlite_engine)()
     
-    postgres_engine = create_engine(postgres_url, echo=False)
-    postgres_session = sessionmaker(autocommit=False, autoflush=False, bind=postgres_engine)()
+    # PostgreSQL connection
+    postgres_engine = create_engine(database_url)
+    postgres_session = sessionmaker(bind=postgres_engine)()
     
     try:
-        # Create tables in Postgres
+        # Create tables in PostgreSQL
+        print("📋 Creating tables in PostgreSQL...")
         Base.metadata.create_all(postgres_engine)
-        print("Created tables in Postgres database")
         
-        # Get all notes from SQLite
-        old_notes = sqlite_session.query(Note).all()
-        print(f"Found {len(old_notes)} notes to migrate")
-        
-        # Migrate each note
-        for old_note in old_notes:
-            new_note = Note(
-                title=old_note.title,
-                content=old_note.content,
-                tags=old_note.tags,
-                event_date=None,  # New field, set to None for existing notes
-                event_time=None,  # New field, set to None for existing notes
-                updated_at=old_note.updated_at
-            )
-            postgres_session.add(new_note)
-        
-        postgres_session.commit()
-        print(f"Successfully migrated {len(old_notes)} notes to Postgres")
+        # Check if SQLite database exists and has data
+        try:
+            sqlite_notes = sqlite_session.query(Note).all()
+            print(f"📊 Found {len(sqlite_notes)} notes in SQLite database")
+            
+            if len(sqlite_notes) == 0:
+                print("ℹ️  No data to migrate from SQLite")
+                return True
+            
+            # Migrate each note
+            migrated_count = 0
+            for note in sqlite_notes:
+                try:
+                    # Create new note in PostgreSQL
+                    new_note = Note(
+                        title=note.title,
+                        content=note.content,
+                        tags=note.tags,
+                        event_date=note.event_date,
+                        event_time=note.event_time,
+                        updated_at=note.updated_at
+                    )
+                    postgres_session.add(new_note)
+                    migrated_count += 1
+                    
+                except Exception as e:
+                    print(f"⚠️  Error migrating note {note.id}: {e}")
+                    continue
+            
+            # Commit all changes
+            postgres_session.commit()
+            print(f"✅ Successfully migrated {migrated_count} notes to PostgreSQL")
+            
+        except Exception as e:
+            print(f"⚠️  SQLite database not found or empty: {e}")
+            print("ℹ️  Proceeding with empty PostgreSQL database")
         
         # Verify migration
-        new_notes = postgres_session.query(Note).all()
-        print(f"Verification: {len(new_notes)} notes now in Postgres database")
+        postgres_notes = postgres_session.query(Note).all()
+        print(f"📊 PostgreSQL database now contains {len(postgres_notes)} notes")
+        
+        return True
         
     except Exception as e:
+        print(f"❌ Migration failed: {e}")
         postgres_session.rollback()
-        print(f"Migration failed: {e}")
+        return False
+        
     finally:
         sqlite_session.close()
         postgres_session.close()
 
-if __name__ == '__main__':
-    migrate_data()
+if __name__ == "__main__":
+    print("🚀 Starting database migration from SQLite to PostgreSQL...")
+    print("=" * 50)
+    
+    success = migrate_sqlite_to_postgres()
+    
+    if success:
+        print("=" * 50)
+        print("✅ Migration completed successfully!")
+        print("You can now deploy to Vercel with PostgreSQL database")
+    else:
+        print("=" * 50)
+        print("❌ Migration failed!")
+        print("Please check your DATABASE_URL and try again")

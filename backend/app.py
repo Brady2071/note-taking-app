@@ -11,7 +11,13 @@ from src.llm import translate_text, generate_structured_notes
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS for Vercel deployment
+CORS(app, origins=[
+    "http://localhost:3000",
+    "https://*.vercel.app",
+    "https://note-taking-app-*.vercel.app"
+])
 
 def get_db():
     db = SessionLocal()

@@ -1,217 +1,205 @@
-# Deployment Guide
+# 🚀 Vercel Deployment Guide
 
-## Environment Variables
+## Prerequisites
 
-### Backend Environment Variables
+1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
+2. **Supabase Account**: Sign up at [supabase.com](https://supabase.com)
+3. **GitHub Repository**: Push your code to GitHub
+4. **API Keys**: OpenAI and GitHub tokens
+
+## Step 1: Set Up Supabase Database
+
+### 1.1 Create Supabase Project
+1. Go to [supabase.com](https://supabase.com)
+2. Click "New Project"
+3. Choose your organization
+4. Enter project details:
+   - **Name**: `note-taking-app`
+   - **Database Password**: Generate a strong password
+   - **Region**: Choose closest to your users
+
+### 1.2 Get Database Connection String
+1. Go to **Settings** → **Database**
+2. Copy the **Connection string** (URI)
+3. Replace `[YOUR-PASSWORD]` with your database password
+4. Example: `postgresql://postgres:yourpassword@db.abcdefgh.supabase.co:5432/postgres`
+
+## Step 2: Deploy to Vercel
+
+### 2.1 Using Vercel CLI (Recommended)
+
 ```bash
-# Database URL (for production)
-DATABASE_URL=postgresql://user:password@host:port/database
+# Install Vercel CLI
+npm install -g vercel
 
-# Flask settings
-FLASK_ENV=production
-SECRET_KEY=your-secret-key-here
+# Login to Vercel
+vercel login
 
-# CORS settings
-CORS_ORIGINS=https://your-frontend-domain.com
+# Deploy from project directory
+vercel
+
+# Follow the prompts:
+# - Set up and deploy? Y
+# - Which scope? [Your account]
+# - Link to existing project? N
+# - What's your project's name? note-taking-app
+# - In which directory is your code located? ./
 ```
 
-### Frontend Environment Variables
+### 2.2 Set Environment Variables
+
+   ```bash
+# Set database URL
+vercel env add DATABASE_URL
+
+# Set OpenAI API key
+vercel env add OPENAI_API_KEY
+
+# Set GitHub token
+vercel env add GITHUB_TOKEN
+
+# Set secret key
+vercel env add SECRET_KEY
+
+# Set Flask environment
+vercel env add FLASK_ENV production
+```
+
+### 2.3 Redeploy with Environment Variables
+
 ```bash
-# API URL (switch from local to production)
-REACT_APP_API_URL=https://your-backend-domain.com/api
-
-# Optional: Analytics, error tracking, etc.
-REACT_APP_ANALYTICS_ID=your-analytics-id
+# Redeploy to apply environment variables
+vercel --prod
 ```
 
-## Frontend Deployment (Vercel)
+## Step 3: Initialize Database
 
-1. **Prepare for production**:
-   ```bash
-   cd frontend
-   npm run build
-   ```
+### 3.1 Run Database Migration
 
-2. **Deploy to Vercel**:
-   - Connect GitHub repository to Vercel
-   - Set build command: `npm run build`
-   - Set output directory: `build`
-   - Add environment variable: `REACT_APP_API_URL=https://your-backend-url.com/api`
+```bash
+# Set DATABASE_URL environment variable locally
+export DATABASE_URL="postgresql://postgres:yourpassword@db.abcdefgh.supabase.co:5432/postgres"
 
-3. **Custom domain** (optional):
-   - Add custom domain in Vercel dashboard
-   - Update CORS settings in backend
+# Run migration script
+cd backend
+python migrate_to_postgres.py
 
-## Backend Deployment (Render)
-
-1. **Prepare for production**:
-   ```bash
-   cd backend
-   # Create requirements.txt (already done)
-   # Create Procfile for Render
-   ```
-
-2. **Create Procfile**:
-   ```
-   web: gunicorn app:app
-   ```
-
-3. **Update requirements.txt** for production:
-   ```
-   Flask==2.3.3
-   Flask-CORS==4.0.0
-   SQLAlchemy==2.0.21
-   python-dateutil==2.8.2
-   gunicorn==21.2.0
-   psycopg2-binary==2.9.7
-   ```
-
-4. **Deploy to Render**:
-   - Connect GitHub repository
-   - Set build command: `pip install -r requirements.txt`
-   - Set start command: `gunicorn app:app`
-   - Add environment variables
-   - Enable auto-deploy from main branch
-
-## Database Migration for Production
-
-### Option 1: PostgreSQL (Recommended)
-```python
-# Update models.py for production
-import os
-from sqlalchemy import create_engine
-
-# Use environment variable for database URL
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///notes.db')
-engine = create_engine(DATABASE_URL, echo=False)
+# Initialize database
+python init_db.py
 ```
 
-### Option 2: Keep SQLite (Simple)
-- SQLite works for small to medium applications
-- File-based, no external database needed
-- Limited concurrent access
+## Step 4: Test Deployment
 
-## Environment Configuration
+### 4.1 Health Check
+Visit: `https://your-app.vercel.app/api/health`
 
-### Development
-- Backend: `http://localhost:5000`
-- Frontend: `http://localhost:3000`
-- Database: SQLite file
+Expected response:
+```json
+{
+  "status": "healthy"
+}
+```
 
-### Production
-- Backend: `https://your-app.onrender.com`
-- Frontend: `https://your-app.vercel.app`
-- Database: PostgreSQL or SQLite
+### 4.2 Test API Endpoints
+- **GET** `/api/notes` - List all notes
+- **POST** `/api/notes` - Create new note
+- **GET** `/api/notes/search?q=query` - Search notes
+
+## Step 5: Frontend Deployment
+
+### 5.1 Build Frontend
+```bash
+cd frontend
+npm run build
+```
+
+### 5.2 Deploy Frontend
+The frontend will be automatically deployed with the Vercel deployment.
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Database Connection Error
+- **Check**: DATABASE_URL is correctly set
+- **Verify**: Supabase project is active
+- **Test**: Connection string in database client
+
+#### 2. CORS Error
+- **Check**: CORS origins in `backend/app.py`
+- **Verify**: Frontend URL matches CORS configuration
+- **Update**: Add your Vercel domain to CORS origins
+
+#### 3. Environment Variables Not Loading
+- **Check**: Variables are set in Vercel dashboard
+- **Verify**: Variable names match exactly
+- **Redeploy**: Run `vercel --prod` after setting variables
+
+#### 4. Build Failures
+- **Check**: All dependencies in `requirements.txt`
+- **Verify**: Python version compatibility
+- **Review**: Build logs in Vercel dashboard
+
+### Debug Commands
+
+```bash
+# Check Vercel deployment status
+vercel ls
+
+# View deployment logs
+vercel logs [deployment-url]
+
+# Check environment variables
+vercel env ls
+
+# Test locally with production environment
+vercel dev
+```
+
+## Environment Variables Reference
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:port/db` |
+| `OPENAI_API_KEY` | OpenAI API key | `sk-...` |
+| `GITHUB_TOKEN` | GitHub personal access token | `ghp_...` |
+| `SECRET_KEY` | Flask secret key | `your-secret-key` |
+| `FLASK_ENV` | Flask environment | `production` |
+
+## Production Checklist
+
+- [ ] Supabase database created and configured
+- [ ] Environment variables set in Vercel
+- [ ] Database migration completed
+- [ ] Health check endpoint working
+- [ ] API endpoints responding correctly
+- [ ] Frontend accessible and functional
+- [ ] CORS configuration working
+- [ ] Error handling in place
+- [ ] Monitoring set up (optional)
 
 ## Security Considerations
 
-1. **CORS Configuration**:
-   ```python
-   # In app.py
-   CORS(app, origins=[
-       "http://localhost:3000",  # Development
-       "https://your-frontend-domain.com"  # Production
-   ])
-   ```
-
-2. **Environment Variables**:
-   - Never commit `.env` files
-   - Use secure secret keys
-   - Rotate keys regularly
-
-3. **Database Security**:
-   - Use connection pooling
-   - Enable SSL for production database
-   - Regular backups
-
-## Monitoring and Logging
-
-### Backend Logging
-```python
-import logging
-from flask import Flask
-
-app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
-
-@app.route('/api/health')
-def health_check():
-    app.logger.info('Health check requested')
-    return jsonify({'status': 'healthy'})
-```
-
-### Frontend Error Tracking
-```typescript
-// Add to App.tsx
-window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error);
-  // Send to error tracking service
-});
-```
+1. **Environment Variables**: Never commit sensitive data to repository
+2. **Database Access**: Use connection pooling and proper authentication
+3. **API Keys**: Rotate keys regularly
+4. **CORS**: Restrict origins to known domains only
+5. **HTTPS**: Vercel provides automatic HTTPS
 
 ## Performance Optimization
 
-### Backend
-- Add database indexes for search
-- Implement pagination for large datasets
-- Add caching for frequently accessed data
+1. **Database Indexing**: Add indexes for frequently queried fields
+2. **Connection Pooling**: Configure database connection pooling
+3. **Caching**: Implement Redis caching for frequently accessed data
+4. **CDN**: Vercel provides automatic CDN for static assets
 
-### Frontend
-- Code splitting for large components
-- Lazy loading for images
-- Service worker for offline support
+## Monitoring and Maintenance
 
-## Backup Strategy
+1. **Vercel Analytics**: Monitor performance and usage
+2. **Database Monitoring**: Use Supabase dashboard
+3. **Error Tracking**: Consider adding Sentry or similar
+4. **Logs**: Monitor Vercel function logs
 
-### Database Backups
-```bash
-# SQLite backup
-cp notes.db backup/notes-$(date +%Y%m%d).db
+---
 
-# PostgreSQL backup
-pg_dump $DATABASE_URL > backup/notes-$(date +%Y%m%d).sql
-```
-
-### Automated Backups
-- Set up cron job for daily backups
-- Store backups in cloud storage
-- Test restore procedures regularly
-
-## Rollback Plan
-
-1. **Frontend Rollback**:
-   - Vercel: Revert to previous deployment
-   - Keep previous build artifacts
-
-2. **Backend Rollback**:
-   - Render: Revert to previous deployment
-   - Database: Restore from backup if needed
-
-3. **Database Rollback**:
-   - Restore from backup
-   - Run migration rollback scripts
-
-## Cost Estimation
-
-### Vercel (Frontend)
-- Free tier: 100GB bandwidth/month
-- Pro: $20/month for unlimited bandwidth
-
-### Render (Backend)
-- Free tier: 750 hours/month
-- Starter: $7/month for always-on service
-
-### Database
-- PostgreSQL on Render: $7/month
-- Or use free SQLite (file-based)
-
-## Final Checklist
-
-- [ ] Environment variables configured
-- [ ] CORS settings updated
-- [ ] Database migrated (if needed)
-- [ ] SSL certificates working
-- [ ] Error tracking enabled
-- [ ] Backup strategy implemented
-- [ ] Performance monitoring set up
-- [ ] Documentation updated
+**Need Help?** Check the [Vercel Documentation](https://vercel.com/docs) or [Supabase Documentation](https://supabase.com/docs)

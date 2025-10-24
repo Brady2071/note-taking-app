@@ -1,49 +1,54 @@
-from models import Base, engine, SessionLocal, Note
-import json
+#!/usr/bin/env python3
+"""
+Database initialization script for PostgreSQL
+Creates tables and initializes the database
+"""
+
+import os
+from models import Base, engine
 
 def init_database():
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
+    """Initialize the PostgreSQL database with required tables"""
     
-    # Create sample data
-    db = SessionLocal()
+    # Check if DATABASE_URL is set
+    database_url = os.getenv('DATABASE_URL')
+    if not database_url:
+        print("❌ DATABASE_URL environment variable not set!")
+        print("Please set DATABASE_URL to your PostgreSQL connection string")
+        return False
+    
     try:
-        # Check if notes already exist
-        if db.query(Note).count() == 0:
-            sample_notes = [
-                {
-                    'title': 'Welcome to Note App',
-                    'content': 'This is your first note. You can edit, delete, and search through your notes.',
-                    'tags': ['welcome', 'getting-started']
-                },
-                {
-                    'title': 'Meeting Notes',
-                    'content': 'Project discussion:\n- Review requirements\n- Set deadlines\n- Assign tasks',
-                    'tags': ['work', 'meeting']
-                },
-                {
-                    'title': 'Shopping List',
-                    'content': '- Milk\n- Bread\n- Eggs\n- Coffee',
-                    'tags': ['personal', 'shopping']
-                }
-            ]
-            
-            for note_data in sample_notes:
-                note = Note()
-                note.title = note_data['title']
-                note.content = note_data['content']
-                note.tags = json.dumps(note_data['tags'])
-                db.add(note)
-            
-            db.commit()
-            print("Database initialized with sample data!")
-        else:
-            print("Database already contains data.")
+        print("📋 Creating database tables...")
+        Base.metadata.create_all(engine)
+        print("✅ Database tables created successfully!")
+        
+        # Test database connection
+        from models import SessionLocal
+        db = SessionLocal()
+        try:
+            # Test query
+            result = db.execute("SELECT 1").fetchone()
+            print("✅ Database connection test successful!")
+        except Exception as e:
+            print(f"⚠️  Database connection test failed: {e}")
+        finally:
+            db.close()
+        
+        return True
+        
     except Exception as e:
-        print(f"Error initializing database: {e}")
-        db.rollback()
-    finally:
-        db.close()
+        print(f"❌ Database initialization failed: {e}")
+        return False
 
-if __name__ == '__main__':
-    init_database()
+if __name__ == "__main__":
+    print("🚀 Initializing PostgreSQL database...")
+    print("=" * 40)
+    
+    success = init_database()
+    
+    if success:
+        print("=" * 40)
+        print("✅ Database initialization completed!")
+    else:
+        print("=" * 40)
+        print("❌ Database initialization failed!")
