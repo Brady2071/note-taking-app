@@ -1,0 +1,183 @@
+.note-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.note-editor-header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.note-title-input {
+  flex: 1;
+  border: none;
+  font-size: 24px;
+  font-weight: 600;
+  outline: none;
+  padding: 0;
+  color: #333;
+}
+
+.note-title-input::placeholder {
+  color: #999;
+}
+
+.note-editor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.save-btn, .delete-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  background-color: #1976d2;
+}
+
+.save-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.delete-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background-color: #d32f2f;
+}
+
+.delete-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.tags-section {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fafafa;
+}
+
+.tags-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tags-input input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+}
+
+.tags-input input:focus {
+  border-color: #2196f3;
+}
+
+.tags-input button {
+  padding: 6px 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tags-input button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.tags-input button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  background-color: #e1f5fe;
+  color: #0277bd;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: #0277bd;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.tag button:hover {
+  background-color: #0277bd;
+  color: white;
+}
+
+.note-content-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  font-family: inherit;
+  color: #333;
+}
+
+.note-content-input::placeholder {
+  color: #999;
+}
+
+.note-editor-footer {
+  padding: 10px 20px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fafafa;
+  text-align: center;
+}
+
+.note-editor-footer small {
+  color: #666;
+  font-size: 11px;
+}
