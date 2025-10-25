@@ -48,3 +48,4 @@ dist/
 # Coverage
 coverage/
 .nyc_output/
+.vercel

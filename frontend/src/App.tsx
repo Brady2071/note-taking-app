@@ -17,20 +17,6 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
 
-  // Load notes on component mount
-  useEffect(() => {
-    loadNotes();
-  }, []);
-
-  // Filter notes based on search query
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      searchNotes(searchQuery);
-    } else {
-      setFilteredNotes(notes);
-    }
-  }, [searchQuery, notes]);
-
   const loadNotes = async () => {
     try {
       setIsLoading(true);
@@ -46,7 +32,7 @@ function App() {
     }
   };
 
-  const searchNotes = async (query: string) => {
+  const searchNotes = useCallback(async (query: string) => {
     try {
       const searchResults = await apiService.searchNotes(query);
       setFilteredNotes(searchResults);
@@ -59,7 +45,21 @@ function App() {
       );
       setFilteredNotes(filtered);
     }
-  };
+  }, [notes]);
+
+  // Load notes on component mount
+  useEffect(() => {
+    loadNotes();
+  }, []);
+
+  // Filter notes based on search query
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      searchNotes(searchQuery);
+    } else {
+      setFilteredNotes(notes);
+    }
+  }, [searchQuery, notes, searchNotes]);
 
   const handleSelectNote = (note: Note) => {
     setSelectedNote(note);

@@ -1,6 +1,6 @@
 import { Note, CreateNoteRequest, UpdateNoteRequest, TranslateRequest, TranslateResponse, GenerateNoteRequest } from '../types/Note';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

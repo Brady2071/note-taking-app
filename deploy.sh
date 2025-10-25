@@ -45,3 +45,4 @@ echo "2. Run the database migration script"
 echo "3. Test your deployed application"
 echo ""
 echo "For detailed instructions, see DEPLOYMENT.md"
+
